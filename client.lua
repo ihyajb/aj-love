@@ -6,7 +6,6 @@ CreateThread(function()
     while not RequestScriptAudioBank("DLC_HEIST3/ARCADE_GENERAL_01", 0) do Wait(0) end
     while not RequestScriptAudioBank( "DLC_HEIST3/ARCADE_GENERAL_02", 0) do Wait(0) end
     while not RequestScriptAudioBank("DLC_TUNER/DLC_Tuner_Arcade_General", 0) do Wait(0) end
-    while not RequestScriptAudioBank("LineArcadeMinigame", 0) do Wait(0) end
 
     print("Scene Sync Enabled | Sounds Requested")
 end)
@@ -60,6 +59,14 @@ local function LoveBar(percentage)
         local height = 1.0
         if percentage > 3.0 then percentage = 3.0 end
         height_wanted = percentage
+
+        print('Attempting to Play Sound')
+        local coords = GetEntityCoords(PlayerPedId())
+        local soundid = GetSoundId()
+        PlaySoundFromCoord(soundid, 'Calculate_Outcome', coords.x, coords.y, coords.z, 'DLC_H3_LoveMachine_Sounds', false, 20, false)
+        SetVariableOnSound(soundid, 'Time', percentage * 2)
+        ReleaseSoundId(soundid)
+
         CreateThread(function()
             while true do
                 Wait(50)
@@ -88,7 +95,7 @@ local function LoveBar(percentage)
 end
 
 RegisterNetEvent('aj-love:client:StartLoveBar', function(percentage)
-    print(percentage)
+    print('Hitting event: aj-love:client:StartLoveBar')
     LoveBar(percentage)
 end)
 
@@ -126,11 +133,9 @@ local function EnterLove(MyPed, coords, heading)
         while true do
             Wait(3)
             if IsControlJustPressed(0, 176) then
-                print('Clicked')
                 break
             end
         end
-        print('Loop was broken!')
         local waitingLeft = NetworkCreateSynchronisedScene(coords.x, coords.y, coords.z, 0.0, 0.0, heading, 2, false, true,  1.0, 0.0, 1.0)
         NetworkAddPedToSynchronisedScene(PlayerPedId(), waitingLeft, AnimLeft, 'anticipation', 8.0, -8.0, 0, 0, 1000.0, 0)
     
@@ -143,8 +148,6 @@ local function EnterLove(MyPed, coords, heading)
         while WaitingOnBar do Wait(100) end
 
         local NormalPercentage = height_wanted * 30
-        print(NormalPercentage)
-
         if NormalPercentage > 95 then
             print('Playing Perfect Anim')
             ClapAnim = Prefect[math.random(1, #Prefect)]
